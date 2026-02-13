@@ -100,9 +100,8 @@ else
     kill $TEST_PID 2>/dev/null
 fi
 
-# Create systemd service
-print_status "Creating systemd service..."
-sudo tee /etc/systemd/system/$APP_NAME.service << EOS
+NODE_PATH=$(which node)
+cat > /tmp/mern-service << EOS
 [Unit]
 Description=MERN Backend API
 After=network.target mongodb.service
@@ -112,14 +111,17 @@ Wants=mongodb.service
 Type=simple
 User=$USER
 WorkingDirectory=$APP_DIR
-ExecStart=/home/iqbala/.nvm/versions/node/v22.21.1/bin/node
+ExecStart=$NODE_PATH $APP_DIR/dist/index.js
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
+Environment=JWT_SECRET=5703b4c2f13349d6acc06fde801882c4e2fee69033b8a6b4362ffbec519d82ed
 
 [Install]
 WantedBy=multi-user.target
 EOS
+
+sudo mv /tmp/mern-service /etc/systemd/system/$APP_NAME.service
 
 # Find the correct entry point
 if [ -f "$APP_DIR/dist/index.js" ]; then

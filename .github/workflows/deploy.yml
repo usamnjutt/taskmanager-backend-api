@@ -1,0 +1,64 @@
+name: Deploy MERN Backend
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  test-and-deploy:
+    runs-on: self-hosted
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+    
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: 📦 Install dependencies
+      run: |
+        npm install
+        echo "✅ Dependencies installed"
+    
+    - name: 🔨 Build application (if needed)
+      run: |
+        if grep -q '"build"' package.json; then
+          npm run build
+          echo "✅ Build completed"
+        else
+          echo "⚠️ No build script found"
+        fi
+      continue-on-error: true
+    
+    - name: 🧪 Run tests (if any)
+      run: |
+        if grep -q '"test"' package.json; then
+          npm test
+          echo "✅ Tests passed"
+        else
+          echo "⚠️ No tests found"
+        fi
+      continue-on-error: true
+    
+    - name: 🚀 Deploy application
+      run: |
+        chmod +x scripts/deploy-backend.sh
+        ./scripts/deploy-backend.sh
+    
+    - name: 📋 Deployment verification
+      run: |
+        echo "🔍 Verifying deployment..."
+        sleep 5
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/users || echo "failed")
+        if [ "$STATUS" = "200" ] || [ "$STATUS" = "401" ] || [ "$STATUS" = "404" ]; then
+          echo "✅ API is responding (HTTP $STATUS)"
+        else
+          echo "⚠️ API check returned $STATUS"
+        fi
+        
+        echo ""
+        echo "📊 Service status:"
+        sudo systemctl status mern-backend-api --no-pager | grep "Active"

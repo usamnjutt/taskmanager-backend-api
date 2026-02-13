@@ -104,11 +104,22 @@ sleep 5
 
 if curl -s http://localhost:$PORT/api/users > /dev/null 2>&1; then
     print_status "✅ Application test PASSED!"
-    kill $TEST_PID 2>/dev/null
 else
     print_warning "Test endpoint not available, but server started"
-    kill $TEST_PID 2>/dev/null
 fi
+
+# 🔥 CRITICAL: Kill the test process and free the port
+print_status "Cleaning up test process..."
+kill $TEST_PID 2>/dev/null
+sleep 3
+
+# Force kill if still running
+sudo pkill -f "node.*index.js" 2>/dev/null || true
+sudo fuser -k $PORT/tcp 2>/dev/null || true
+sleep 3
+
+print_status "Port $PORT is now free"
+
 
 NODE_PATH=$(which node)
 cat > /tmp/mern-service << EOS

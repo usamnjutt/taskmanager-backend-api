@@ -1,5 +1,8 @@
 #!/bin/bash
 
+sudo systemctl stop mern-backend-api 2>/dev/null || true
+sleep 2
+
 echo "🚀 DEPLOYING MERN BACKEND API"
 echo "=============================="
 
@@ -123,14 +126,6 @@ EOS
 
 sudo mv /tmp/mern-service /etc/systemd/system/$APP_NAME.service
 
-# Find the correct entry point
-if [ -f "$APP_DIR/dist/index.js" ]; then
-    sudo sed -i "s|ExecStart=.*|ExecStart=/usr/bin/node $APP_DIR/dist/index.js|" /etc/systemd/system/$APP_NAME.service
-elif [ -f "$APP_DIR/src/index.js" ]; then
-    sudo sed -i "s|ExecStart=.*|ExecStart=/usr/bin/node $APP_DIR/src/index.js|" /etc/systemd/system/$APP_NAME.service
-else
-    sudo sed -i "s|ExecStart=.*|ExecStart=/usr/bin/node $APP_DIR/index.js|" /etc/systemd/system/$APP_NAME.service
-fi
 
 # Start service
 print_status "Starting service..."

@@ -3,6 +3,13 @@
 sudo systemctl stop mern-backend-api 2>/dev/null || true
 sleep 2
 
+sudo fuser -k 8000/tcp 2>/dev/null || true
+sleep 2
+
+# Also kill any stray node processes
+sudo pkill -f "node.*mern-backend-api" 2>/dev/null || true
+sleep 2
+
 echo "🚀 DEPLOYING MERN BACKEND API"
 echo "=============================="
 
@@ -146,7 +153,7 @@ if sudo systemctl is-active --quiet $APP_NAME; then
     # Test endpoints
     echo ""
     print_status "Testing API endpoints:"
-    
+  
     # Try different endpoints
     ENDPOINTS=("/api/users" "/" "/api/health" "/api")
     for endpoint in "${ENDPOINTS[@]}"; do

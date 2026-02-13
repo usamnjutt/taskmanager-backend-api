@@ -59,7 +59,7 @@ rsync -av --progress . $APP_DIR --exclude node_modules --exclude .git --exclude 
 # Install dependencies
 cd $APP_DIR
 print_status "Installing dependencies..."
-npm install --production
+npm install
 
 # Check if build script exists and run it
 if grep -q '"build"' package.json; then
@@ -112,7 +112,7 @@ Wants=mongodb.service
 Type=simple
 User=$USER
 WorkingDirectory=$APP_DIR
-ExecStart=/usr/bin/node $APP_DIR/dist/index.js
+ExecStart=/home/iqbala/.nvm/versions/node/v22.21.1/bin/node
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
